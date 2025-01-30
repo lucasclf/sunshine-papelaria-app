@@ -10,6 +10,7 @@ object DatabaseFactory {
 
         transaction(database) {
             SchemaUtils.create(Products)
+            SchemaUtils.create(Clients)
         }
     }
 }

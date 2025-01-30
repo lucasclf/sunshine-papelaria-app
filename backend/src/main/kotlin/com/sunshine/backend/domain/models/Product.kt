@@ -1,4 +1,4 @@
-package com.sunshine.backend.models
+package com.sunshine.backend.domain.models
 
 import kotlinx.serialization.Serializable
 

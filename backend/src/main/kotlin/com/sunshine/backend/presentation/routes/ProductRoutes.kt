@@ -1,21 +1,21 @@
-package com.sunshine.backend.routes
+package com.sunshine.backend.presentation.routes
 
-import com.sunshine.backend.database.ProductDAO
-import com.sunshine.backend.models.Product
+import com.sunshine.backend.application.services.ProductService
+import com.sunshine.backend.domain.models.Product
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
-fun Route.productRoutes() {
+fun Route.productRoutes(service: ProductService) {
     route("/products") {
         get {
-            call.respond(ProductDAO.getAll())
+            call.respond(service.getAllProducts())
         }
 
         get("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                val product = ProductDAO.getById(id)
+                val product = service.getProductById(id)
                 if (product != null) call.respond(product) else call.respond("Produto não encontrado")
             } else {
                 call.respond("ID inválido")
@@ -24,7 +24,7 @@ fun Route.productRoutes() {
 
         post {
             val product = call.receive<Product>()
-            val id = ProductDAO.insert(product)
+            val id = service.createProduct(product)
             call.respond("Produto inserido com ID $id")
         }
 
@@ -32,7 +32,7 @@ fun Route.productRoutes() {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
                 val product = call.receive<Product>().copy(id = id)
-                val updated = ProductDAO.update(product)
+                val updated = service.updateProduct(product)
                 call.respond(if (updated) "Produto atualizado" else "Produto não encontrado")
             } else {
                 call.respond("ID inválido")
@@ -42,7 +42,7 @@ fun Route.productRoutes() {
         delete("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                val deleted = ProductDAO.delete(id)
+                val deleted = service.deleteProduct(id)
                 call.respond(if (deleted) "Produto removido" else "Produto não encontrado")
             } else {
                 call.respond("ID inválido")

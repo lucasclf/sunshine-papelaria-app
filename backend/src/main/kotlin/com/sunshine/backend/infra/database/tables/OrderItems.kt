@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 object OrderItems: Table() {
     val orderId = integer("order_id").references(Orders.id, onDelete = ReferenceOption.CASCADE)
-    val productId = integer("product_id").references(Products.id)
+    val productId = integer("product_id").references(Products.id, onDelete = ReferenceOption.RESTRICT)
     val quantity = integer("quantity")
     val createDate = datetime("create_date").clientDefault { LocalDateTime.now() }
     val updateDate = datetime("update_date").clientDefault { LocalDateTime.now() }

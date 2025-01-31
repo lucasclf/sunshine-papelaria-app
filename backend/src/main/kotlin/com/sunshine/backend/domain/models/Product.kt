@@ -11,7 +11,7 @@ data class Product(
     val price: Double,
     val stock: Int,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val createDate: LocalDateTime,
+    val createDate:LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val updateDate: LocalDateTime,
+    val updateDate: LocalDateTime? = null
 )

@@ -2,10 +2,9 @@ package com.sunshine.backend.infra.database.repositories.impl
 
 import com.sunshine.backend.domain.models.Product
 import com.sunshine.backend.domain.repositories.ProductRepository
-import com.sunshine.backend.infra.database.tables.Orders
-import com.sunshine.backend.infra.database.tables.Orders.createDate
-import com.sunshine.backend.infra.database.tables.Orders.updateDate
 import com.sunshine.backend.infra.database.tables.Products
+import com.sunshine.backend.infra.database.tables.Products.createDate
+import com.sunshine.backend.infra.database.tables.Products.updateDate
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -53,7 +52,7 @@ class ProductRepositoryImpl : ProductRepository {
             it[name] = product.name
             it[price] = product.price
             it[stock] = product.stock
-            it[Orders.updateDate]= LocalDateTime.now()
+            it[updateDate]= LocalDateTime.now()
         } > 0
     }
 

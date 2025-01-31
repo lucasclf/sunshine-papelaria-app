@@ -14,11 +14,11 @@ class OrderService(
 ) {
     fun getAllOrders(): List<Order> = orderRepository.getAll()
     fun getOrder(orderId: Int): Order? = orderRepository.getById(orderId)
-    fun createOrder(order: Order, items: List<OrderItem>): Int {
+    fun createOrder(order: Order): Int {
         return transaction {
             val orderId: Int = orderRepository.insert(order)
 
-            orderItemRepository.insert(orderId, items)
+            orderItemRepository.insert(orderId, order.items)
 
             return@transaction orderId
         }

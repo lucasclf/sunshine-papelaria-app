@@ -2,7 +2,9 @@ package com.sunshine.backend.infra.database.repositories.impl
 
 import com.sunshine.backend.domain.enums.OrderStatus
 import com.sunshine.backend.domain.models.Order
+import com.sunshine.backend.domain.models.OrderItem
 import com.sunshine.backend.domain.repositories.OrderRepository
+import com.sunshine.backend.infra.database.tables.OrderItems
 
 
 import com.sunshine.backend.infra.database.tables.Orders
@@ -13,24 +15,45 @@ import com.sunshine.backend.infra.database.tables.Orders.totalValue
 import com.sunshine.backend.infra.database.tables.Orders.updateDate
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.LocalDateTime
 
 
 class OrderRepositoryImpl : OrderRepository {
     override fun getAll(): List<Order> = transaction {
-        Orders.selectAll().map {
+        val items = OrderItems.selectAll().map {
+            OrderItem(
+                orderId = it[OrderItems.orderId],
+                productId = it[OrderItems.productId],
+                quantity = it[OrderItems.quantity],
+                createDate = it[OrderItems.createDate],
+                updateDate = it[OrderItems.updateDate]
+            )
+        }
+
+        Orders.selectAll().map {orderRow ->
             Order(
-                id = it[Orders.id],
-                clientId = it[clientId],
-                totalValue = it[totalValue],
-                status = it[status],
-                createDate = it[createDate],
-                updateDate = it[updateDate]
+                id = orderRow[Orders.id],
+                clientId = orderRow[clientId],
+                totalValue = orderRow[totalValue],
+                status = orderRow[status],
+                items = items.filter { it.orderId == orderRow[Orders.id] },
+                createDate = orderRow[createDate],
+                updateDate = orderRow[updateDate]
             )
         }
     }
 
     override fun getById(orderId: Int): Order? = transaction {
+        val items = OrderItems.selectAll().where { OrderItems.orderId eq orderId }
+            .map {
+            OrderItem(
+                orderId = it[OrderItems.orderId],
+                productId = it[OrderItems.productId],
+                quantity = it[OrderItems.quantity],
+                createDate = it[OrderItems.createDate],
+                updateDate = it[OrderItems.updateDate]
+            )
+        }
+
         Orders.selectAll().where { Orders.id eq orderId }
             .map {
                 Order(
@@ -38,6 +61,7 @@ class OrderRepositoryImpl : OrderRepository {
                     clientId = it[clientId],
                     totalValue = it[totalValue],
                     status = it[status],
+                    items = items,
                     createDate = it[createDate],
                     updateDate = it[updateDate]
                 )
@@ -47,20 +71,11 @@ class OrderRepositoryImpl : OrderRepository {
     override fun insert(order: Order): Int {
         return transaction {
             Orders.insert {
-                it[clientId] = clientId
-                it[totalValue] = totalValue
+                it[clientId] = order.clientId
+                it[totalValue] = order.totalValue
                 it[status] = OrderStatus.AWAITING_PAYMENT
             } get Orders.id
         }
-    }
-
-    override fun update(order: Order): Boolean = transaction {
-        Orders.update({ Orders.id eq order.id}) {
-            it[clientId] = order.clientId
-            it[totalValue] = order.totalValue
-            it[status] = order.status
-            it[updateDate]= LocalDateTime.now()
-        } > 0
     }
 
     override fun updateStatus(orderId: Int, status: OrderStatus): Boolean = transaction {

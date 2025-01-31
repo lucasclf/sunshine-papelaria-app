@@ -1,18 +1,20 @@
 package com.sunshine.backend.infra.database
 
-import com.sunshine.backend.infra.database.tables.Clients
-import com.sunshine.backend.infra.database.tables.Products
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
     fun init() {
         val database = Database.connect("jdbc:sqlite:database.db", driver = "org.sqlite.JDBC")
 
+        Flyway.configure()
+            .dataSource("jdbc:sqlite:database.db", null, null)
+            .load()
+            .migrate()
+
         transaction(database) {
-            SchemaUtils.create(Products)
-            SchemaUtils.create(Clients)
+
         }
     }
 }

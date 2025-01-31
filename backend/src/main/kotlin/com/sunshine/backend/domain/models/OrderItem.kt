@@ -10,7 +10,7 @@ data class OrderItem(
     val productId: Int,
     val quantity: Int,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val createDate: LocalDateTime,
+    val createDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val updateDate: LocalDateTime,
+    val updateDate: LocalDateTime? = null
 )

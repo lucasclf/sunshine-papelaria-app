@@ -12,7 +12,7 @@ data class Client(
     val cep: String,
     val contact: String,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val createDate: LocalDateTime,
+    val createDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val updateDate: LocalDateTime
+    val updateDate: LocalDateTime? = null
 )

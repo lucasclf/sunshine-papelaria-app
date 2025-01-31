@@ -10,9 +10,10 @@ data class Order (
     val id: Int,
     val clientId: Int,
     val totalValue: Double,
-    val status: OrderStatus,
+    val status: OrderStatus = OrderStatus.AWAITING_PAYMENT,
+    val items: List<OrderItem>,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val createDate: LocalDateTime,
+    val createDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val updateDate: LocalDateTime,
+    val updateDate: LocalDateTime? = null
 )

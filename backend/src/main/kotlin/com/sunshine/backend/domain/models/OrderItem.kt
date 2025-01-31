@@ -5,11 +5,10 @@ import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 @Serializable
-data class Product(
-    val id: Int,
-    val name: String,
-    val price: Double,
-    val stock: Int,
+data class OrderItem(
+    val orderId: Int? = null,
+    val productId: Int,
+    val quantity: Int,
     @Serializable(with = LocalDateTimeSerializer::class)
     val createDate: LocalDateTime,
     @Serializable(with = LocalDateTimeSerializer::class)

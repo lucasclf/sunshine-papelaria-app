@@ -2,10 +2,11 @@ package com.sunshine.backend.infra.database.repositories.impl
 
 import com.sunshine.backend.domain.models.Client
 import com.sunshine.backend.domain.repositories.ClientRepository
-import com.sunshine.backend.infra.database.Clients
+import com.sunshine.backend.infra.database.tables.Clients
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.LocalDateTime
 
 class ClientRepositoryImpl : ClientRepository {
     override fun getAll(): List<Client> = transaction {
@@ -15,7 +16,9 @@ class ClientRepositoryImpl : ClientRepository {
                 name = it[Clients.name],
                 address = it[Clients.address],
                 cep = it[Clients.cep],
-                contact = it[Clients.contact]
+                contact = it[Clients.contact],
+                createDate = it[Clients.createDate],
+                updateDate = it[Clients.updateDate]
             )
         }
     }
@@ -28,11 +31,12 @@ class ClientRepositoryImpl : ClientRepository {
                     name = it[Clients.name],
                     address = it[Clients.address],
                     cep = it[Clients.cep],
-                    contact = it[Clients.contact]
+                    contact = it[Clients.contact],
+                    createDate = it[Clients.createDate],
+                    updateDate = it[Clients.updateDate]
                 )
             }
-            }
-            .singleOrNull()
+        }.singleOrNull()
 
     override fun insert(client: Client): Int = transaction {
         Clients.insert {
@@ -49,6 +53,7 @@ class ClientRepositoryImpl : ClientRepository {
             it[address] = client.address
             it[cep] = client.cep
             it[contact] = client.contact
+            it[updateDate]= LocalDateTime.now()
         } > 0
     }
 

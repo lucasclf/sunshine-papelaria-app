@@ -7,9 +7,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import org.slf4j.LoggerFactory
 
-val logger = LoggerFactory.getLogger("com.sunshine.backend.presentation.routes.clientRoutes")
 
 fun Route.clientRoutes(service: ClientService) {
+    val logger = LoggerFactory.getLogger("com.sunshine.backend.presentation.routes.clientRoutes")
+
     route("/clients") {
         get {
             logger.info("Iniciando recuperação de todos os clientes!")

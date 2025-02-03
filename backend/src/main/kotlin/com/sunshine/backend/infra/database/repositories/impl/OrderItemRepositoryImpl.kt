@@ -6,7 +6,6 @@ import com.sunshine.backend.infra.database.tables.OrderItems
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.LocalDateTime
 
 class OrderItemRepositoryImpl : OrderItemRepository {
     override fun getAll(): List<OrderItem> = transaction {
@@ -15,8 +14,7 @@ class OrderItemRepositoryImpl : OrderItemRepository {
                 orderId = it[OrderItems.orderId],
                 productId = it[OrderItems.productId],
                 quantity = it[OrderItems.quantity],
-                createDate = it[OrderItems.createDate],
-                updateDate = it[OrderItems.updateDate]
+                createDate = it[OrderItems.createDate]
             )
         }
     }
@@ -29,8 +27,7 @@ class OrderItemRepositoryImpl : OrderItemRepository {
                 orderId = it[OrderItems.orderId],
                 productId = it[OrderItems.productId],
                 quantity = it[OrderItems.quantity],
-                createDate = it[OrderItems.createDate],
-                updateDate = it[OrderItems.updateDate]
+                createDate = it[OrderItems.createDate]
             )
         }
     }.singleOrNull()
@@ -41,8 +38,7 @@ class OrderItemRepositoryImpl : OrderItemRepository {
                 orderId = it[OrderItems.orderId],
                 productId = it[OrderItems.productId],
                 quantity = it[OrderItems.quantity],
-                createDate = it[OrderItems.createDate],
-                updateDate = it[OrderItems.updateDate]
+                createDate = it[OrderItems.createDate]
             )
         }
     }
@@ -60,7 +56,6 @@ class OrderItemRepositoryImpl : OrderItemRepository {
             (OrderItems.orderId eq orderItem.orderId!!) and (OrderItems.productId eq orderItem.productId)
         }) {
             it[quantity] = orderItem.quantity
-            it[updateDate]= LocalDateTime.now()
         } > 0
     }
 

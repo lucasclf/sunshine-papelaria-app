@@ -10,7 +10,6 @@ object OrderItems: Table() {
     val productId = integer("product_id").references(Products.id, onDelete = ReferenceOption.RESTRICT)
     val quantity = integer("quantity")
     val createDate = datetime("create_date").clientDefault { LocalDateTime.now() }
-    val updateDate = datetime("update_date").clientDefault { LocalDateTime.now() }
 
     override val primaryKey = PrimaryKey(orderId, productId)
 }

@@ -9,9 +9,17 @@ import java.time.LocalDateTime
 data class Order (
     val id: Int,
     val clientId: Int,
-    val totalValue: Double,
+    val totalValue: Double = 0.0,
     val status: OrderStatus = OrderStatus.AWAITING_PAYMENT,
     val items: List<OrderItem>,
+    val freight: Double = 0.0,
+    val discount: Double = 0.0,
+    val trackingCode: String? = null,
+    val carrierName: String? =null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val paymentDate: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val sentDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
     val createDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)

@@ -5,7 +5,7 @@ import com.sunshine.backend.domain.enums.SunshineExceptionEnum
 import com.sunshine.backend.domain.exceptions.SunshineException
 import com.sunshine.backend.domain.models.ClientModel
 import com.sunshine.backend.domain.repositories.ClientRepository
-import com.sunshine.backend.infra.ClientAdapter
+import com.sunshine.backend.infra.adapters.ClientAdapter
 import com.sunshine.backend.infra.database.tables.ClientEntity
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction

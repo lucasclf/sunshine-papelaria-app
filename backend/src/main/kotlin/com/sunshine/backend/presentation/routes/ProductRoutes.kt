@@ -1,7 +1,8 @@
 package com.sunshine.backend.presentation.routes
 
 import com.sunshine.backend.application.services.ProductService
-import com.sunshine.backend.domain.models.ProductModel
+import com.sunshine.backend.presentation.requests.ProductRequest
+import com.sunshine.backend.presentation.utils.ValidationUtils.validateId
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -14,39 +15,35 @@ fun Route.productRoutes(service: ProductService) {
 
         get("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val product = service.getProductById(id)
-                if (product != null) call.respond(product) else call.respond("Produto não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+            validateId(id)
+
+            val product = service.getProductById(id!!)
+            call.respond(product)
         }
 
         post {
-            val productModel = call.receive<ProductModel>()
-            val id = service.createProduct(productModel)
-            call.respond("Produto inserido com ID $id")
+            val productRequest = call.receive<ProductRequest>()
+            val persistedProduct = service.createProduct(productRequest)
+            call.respond(persistedProduct)
         }
 
         put("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val productModel = call.receive<ProductModel>().copy(id = id)
-                val updated = service.updateProduct(productModel)
-                call.respond(if (updated) "Produto atualizado" else "Produto não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+            validateId(id)
+
+            val productRequest = call.receive<ProductRequest>()
+            val updatedProduct = service.updateProduct(productRequest, id!!)
+            call.respond(updatedProduct)
+
         }
 
-        delete("/{id}") {
+        patch("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val deleted = service.deleteProduct(id)
-                call.respond(if (deleted) "Produto removido" else "Produto não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+            validateId(id)
+
+            val status = call.request.headers["status"]
+            val updatedProduct = service.updateProductStatus(id!!, status)
+            call.respond(updatedProduct)
         }
     }
 }

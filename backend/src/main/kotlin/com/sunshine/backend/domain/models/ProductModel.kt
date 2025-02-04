@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 @Serializable
 data class ProductModel(
-    val id: Int,
+    val id: Int? = null,
     val name: String,
     val price: Double,
     val stock: Int,

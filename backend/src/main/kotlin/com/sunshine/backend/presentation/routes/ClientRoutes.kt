@@ -1,9 +1,8 @@
 package com.sunshine.backend.presentation.routes
 
 import com.sunshine.backend.application.services.ClientService
-import com.sunshine.backend.domain.enums.SunshineExceptionEnum
-import com.sunshine.backend.domain.exceptions.SunshineException
 import com.sunshine.backend.presentation.requests.ClientRequest
+import com.sunshine.backend.presentation.utils.ValidationUtils.validateId
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -55,11 +54,5 @@ fun Route.clientRoutes(service: ClientService) {
 
             call.respond(service.updateClientStatus(id!!, status))
         }
-    }
-}
-
-fun validateId(id: Int?){
-    if(id == null){
-        throw SunshineException(SunshineExceptionEnum.INVALID_ID)
     }
 }

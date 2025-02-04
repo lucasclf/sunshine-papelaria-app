@@ -6,85 +6,85 @@ import com.sunshine.backend.domain.models.OrderItemModel
 import com.sunshine.backend.domain.models.OrderPaidUpdateModel
 import com.sunshine.backend.domain.models.OrderSentUpdateModel
 import com.sunshine.backend.domain.repositories.OrderRepository
-import com.sunshine.backend.infra.database.tables.OrderItems
+import com.sunshine.backend.infra.database.tables.OrderItemEntity
 
 
-import com.sunshine.backend.infra.database.tables.Orders
+import com.sunshine.backend.infra.database.tables.OrderEntity
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 
 class OrderRepositoryImpl : OrderRepository {
     override fun getAll(): List<OrderModel> = transaction {
-        val items = OrderItems.selectAll().map {
+        val items = OrderItemEntity.selectAll().map {
             OrderItemModel(
-                orderId = it[OrderItems.orderId],
-                productId = it[OrderItems.productId],
-                quantity = it[OrderItems.quantity],
-                createDate = it[OrderItems.createDate]
+                orderId = it[OrderItemEntity.orderId],
+                productId = it[OrderItemEntity.productId],
+                quantity = it[OrderItemEntity.quantity],
+                createDate = it[OrderItemEntity.createDate]
             )
         }
 
-        Orders.selectAll().map {orderRow ->
+        OrderEntity.selectAll().map { orderRow ->
             OrderModel(
-                id = orderRow[Orders.id],
-                clientId = orderRow[Orders.clientId],
-                totalValue = orderRow[Orders.totalValue],
-                status = orderRow[Orders.status],
-                items = items.filter { it.orderId == orderRow[Orders.id] },
-                discount = orderRow[Orders.discount],
-                freight = orderRow[Orders.freight],
-                carrierName = orderRow[Orders.carrierName],
-                trackingCode = orderRow[Orders.trackingCode],
-                sentDate = orderRow[Orders.sentDate],
-                createDate = orderRow[Orders.createDate],
-                updateDate = orderRow[Orders.updateDate]
+                id = orderRow[OrderEntity.id],
+                clientId = orderRow[OrderEntity.clientId],
+                totalValue = orderRow[OrderEntity.totalValue],
+                status = orderRow[OrderEntity.status],
+                items = items.filter { it.orderId == orderRow[OrderEntity.id] },
+                discount = orderRow[OrderEntity.discount],
+                freight = orderRow[OrderEntity.freight],
+                carrierName = orderRow[OrderEntity.carrierName],
+                trackingCode = orderRow[OrderEntity.trackingCode],
+                sentDate = orderRow[OrderEntity.sentDate],
+                createDate = orderRow[OrderEntity.createDate],
+                updateDate = orderRow[OrderEntity.updateDate]
             )
         }
     }
 
     override fun getById(orderId: Int): OrderModel? = transaction {
-        val items = OrderItems.selectAll().where { OrderItems.orderId eq orderId }
+        val items = OrderItemEntity.selectAll().where { OrderItemEntity.orderId eq orderId }
             .map {
             OrderItemModel(
-                orderId = it[OrderItems.orderId],
-                productId = it[OrderItems.productId],
-                quantity = it[OrderItems.quantity],
-                createDate = it[OrderItems.createDate]
+                orderId = it[OrderItemEntity.orderId],
+                productId = it[OrderItemEntity.productId],
+                quantity = it[OrderItemEntity.quantity],
+                createDate = it[OrderItemEntity.createDate]
             )
         }
 
-        Orders.selectAll().where { Orders.id eq orderId }
+        OrderEntity.selectAll().where { OrderEntity.id eq orderId }
             .map {
                 OrderModel(
-                    id = it[Orders.id],
-                    clientId = it[Orders.clientId],
-                    totalValue = it[Orders.totalValue],
-                    status = it[Orders.status],
+                    id = it[OrderEntity.id],
+                    clientId = it[OrderEntity.clientId],
+                    totalValue = it[OrderEntity.totalValue],
+                    status = it[OrderEntity.status],
                     items = items,
-                    discount = it[Orders.discount],
-                    freight = it[Orders.freight],
-                    carrierName = it[Orders.carrierName],
-                    trackingCode = it[Orders.trackingCode],
-                    sentDate = it[Orders.sentDate],
-                    createDate = it[Orders.createDate],
-                    updateDate = it[Orders.updateDate]
+                    discount = it[OrderEntity.discount],
+                    freight = it[OrderEntity.freight],
+                    carrierName = it[OrderEntity.carrierName],
+                    trackingCode = it[OrderEntity.trackingCode],
+                    sentDate = it[OrderEntity.sentDate],
+                    createDate = it[OrderEntity.createDate],
+                    updateDate = it[OrderEntity.updateDate]
                 )
             }
     }.singleOrNull()
 
     override fun insert(orderModel: OrderModel, value: Double): Int {
         return transaction {
-            Orders.insert {
+            OrderEntity.insert {
                 it[clientId] = orderModel.clientId
                 it[totalValue] = value
                 it[status] = OrderStatusEnum.AWAITING_PAYMENT
-            } get Orders.id
+            } get OrderEntity.id
         }
     }
 
     override fun updateOrderToPaid(orderId: Int, update: OrderPaidUpdateModel): Boolean = transaction {
-        Orders.update({ Orders.id eq orderId }) {
+        OrderEntity.update({ OrderEntity.id eq orderId }) {
             it[status] = OrderStatusEnum.PAID
             it[discount] = update.discount
             it[freight] = update.freight
@@ -94,7 +94,7 @@ class OrderRepositoryImpl : OrderRepository {
     }
 
     override fun updateOrderToSent(orderId: Int, update: OrderSentUpdateModel): Boolean = transaction {
-        Orders.update({ Orders.id eq orderId }) {
+        OrderEntity.update({ OrderEntity.id eq orderId }) {
             it[status] = OrderStatusEnum.SENT
             it[carrierName] = update.carrierName
             it[trackingCode] = update.trackingCode
@@ -104,7 +104,7 @@ class OrderRepositoryImpl : OrderRepository {
     }
 
     override fun delete(orderId: Int): Boolean = transaction {
-        Orders.update({ Orders.id eq orderId }) {
+        OrderEntity.update({ OrderEntity.id eq orderId }) {
             it[status] = OrderStatusEnum.CANCELED
         } > 0
     }

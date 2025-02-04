@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
-object Products : Table() {
+object ProductEntity : Table("Products") {
     val id = integer("id").autoIncrement()
     val name = varchar("name", 255)
     val price = double("price")

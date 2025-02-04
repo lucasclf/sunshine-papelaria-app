@@ -6,9 +6,9 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
-object Orders: Table() {
+object OrderEntity: Table("Orders") {
     val id = integer("id").autoIncrement()
-    val clientId = integer("client_id").references(Clients.id, onDelete = ReferenceOption.CASCADE)
+    val clientId = integer("client_id").references(ClientEntity.id, onDelete = ReferenceOption.CASCADE)
     val totalValue = double("total_value")
     val discount = double("discount")
     val freight = double("freight")

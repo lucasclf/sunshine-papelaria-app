@@ -2,9 +2,9 @@ package com.sunshine.backend.presentation.routes
 
 import com.sunshine.backend.application.services.OrderService
 import kotlinx.serialization.json.Json
-import com.sunshine.backend.domain.models.Order
-import com.sunshine.backend.domain.models.OrderPaidUpdate
-import com.sunshine.backend.domain.models.OrderSentUpdate
+import com.sunshine.backend.domain.models.OrderModel
+import com.sunshine.backend.domain.models.OrderPaidUpdateModel
+import com.sunshine.backend.domain.models.OrderSentUpdateModel
 import io.ktor.http.*
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -33,8 +33,8 @@ fun Route.orderRoutes(service: OrderService) {
         }
 
         post {
-            val order = call.receive<Order>()
-            val id = service.createOrder(order)
+            val orderModel = call.receive<OrderModel>()
+            val id = service.createOrder(orderModel)
             call.respond("Pedido inserido com ID $id")
         }
 
@@ -53,13 +53,13 @@ fun Route.orderRoutes(service: OrderService) {
 
             when {
                 jsonUpdate.containsKey("paymentDate") -> {
-                    val orderPaidUpdate = Json.decodeFromJsonElement<OrderPaidUpdate>(jsonUpdate)
-                    val updated = service.updateOrderToPaid(id, orderPaidUpdate)
+                    val orderPaidUpdateModel = Json.decodeFromJsonElement<OrderPaidUpdateModel>(jsonUpdate)
+                    val updated = service.updateOrderToPaid(id, orderPaidUpdateModel)
                     call.respond(if (updated) "Pedido atualizado" else "Pedido não encontrado")
                 }
                 jsonUpdate.containsKey("sentDate") -> {
-                    val orderSentUpdate = Json.decodeFromJsonElement<OrderSentUpdate>(jsonUpdate)
-                    val updated = service.updateOrderToSent(id, orderSentUpdate)
+                    val orderSentUpdateModel = Json.decodeFromJsonElement<OrderSentUpdateModel>(jsonUpdate)
+                    val updated = service.updateOrderToSent(id, orderSentUpdateModel)
                     call.respond(if (updated) "Pedido atualizado" else "Pedido não encontrado")
                 }
             }

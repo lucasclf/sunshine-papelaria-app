@@ -5,9 +5,10 @@ import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 @Serializable
-data class OrderSentUpdate(
-    val carrierName: String,
-    val trackingCode: String,
+data class OrderItemModel(
+    val orderId: Int? = null,
+    val productId: Int,
+    val quantity: Int,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val sentDate: LocalDateTime
+    val createDate: LocalDateTime? = null
 )

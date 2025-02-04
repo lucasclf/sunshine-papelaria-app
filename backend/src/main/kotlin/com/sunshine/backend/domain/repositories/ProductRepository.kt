@@ -1,11 +1,11 @@
 package com.sunshine.backend.domain.repositories
 
-import com.sunshine.backend.domain.models.Product
+import com.sunshine.backend.domain.models.ProductModel
 
 interface ProductRepository {
-    fun getAll(): List<Product>
-    fun getById(productId: Int): Product?
-    fun insert(product: Product): Int
-    fun update(product: Product): Boolean
+    fun getAll(): List<ProductModel>
+    fun getById(productId: Int): ProductModel?
+    fun insert(productModel: ProductModel): Int
+    fun update(productModel: ProductModel): Boolean
     fun delete(productId: Int): Boolean
 }

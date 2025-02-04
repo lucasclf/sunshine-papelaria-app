@@ -1,6 +1,6 @@
 package com.sunshine.backend.infra.database.tables
 
-import com.sunshine.backend.domain.enums.OrderStatus
+import com.sunshine.backend.domain.enums.OrderStatusEnum
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
@@ -12,7 +12,7 @@ object Orders: Table() {
     val totalValue = double("total_value")
     val discount = double("discount")
     val freight = double("freight")
-    val status = enumerationByName("status", 50, OrderStatus::class)
+    val status = enumerationByName("status", 50, OrderStatusEnum::class)
     val trackingCode = varchar("tracking_code", 50)
     val carrierName = varchar("carrier_name", 50)
     val paymentDate = datetime("payment_date")

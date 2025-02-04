@@ -4,6 +4,7 @@ CREATE TABLE Products (
                           name VARCHAR(255) NOT NULL,
                           price DOUBLE NOT NULL,
                           stock INTEGER NOT NULL,
+                          status VARCHAR(50) NOT NULL,
                           create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                           update_date DATETIME DEFAULT CURRENT_TIMESTAMP
 );

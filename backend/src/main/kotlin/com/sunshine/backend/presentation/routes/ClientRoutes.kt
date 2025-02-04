@@ -1,7 +1,9 @@
 package com.sunshine.backend.presentation.routes
 
 import com.sunshine.backend.application.services.ClientService
-import com.sunshine.backend.domain.models.Client
+import com.sunshine.backend.domain.enums.SunshineExceptionEnum
+import com.sunshine.backend.domain.exceptions.SunshineException
+import com.sunshine.backend.presentation.requests.ClientRequest
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -18,49 +20,46 @@ fun Route.clientRoutes(service: ClientService) {
         }
 
         get("/{id}") {
-
             val id = call.parameters["id"]?.toIntOrNull()
             logger.info("Iniciando recuperação de cliente pelo id ${id}!")
+            validateId(id)
 
-            if (id != null) {
-                val client = service.getClientById(id)
-                if (client != null) call.respond(client) else call.respond("Cliente não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+            call.respond(service.getClientById(id!!))
         }
 
         post {
             logger.info("Iniciando criação de cliente!")
-            val client = call.receive<Client>()
-            val id = service.createClient(client)
-            call.respond("Cliente inserido com ID $id")
+            val request = call.receive<ClientRequest>()
+            call.respond(service.createClient(request))
         }
 
         put("/{id}") {
 
             val id = call.parameters["id"]?.toIntOrNull()
             logger.info("Iniciando atualização do cliente ${id}!")
+            validateId(id)
 
-            if (id != null) {
-                val client = call.receive<Client>().copy(id = id)
-                val updated = service.updateClient(client)
-                call.respond(if (updated) "Cliente atualizado" else "Cliente não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+
+            val request = call.receive<ClientRequest>()
+            call.respond(service.updateClient(request, id!!))
+
         }
 
-        delete("/{id}") {
+        patch("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
+            validateId(id)
+
+            val status = call.request.headers["status"]
+
             logger.info("Iniciando exclusão do cliente ${id}!")
 
-            if (id != null) {
-                val deleted = service.deleteClient(id)
-                call.respond(if (deleted) "Cliente removido" else "Cliente não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+            call.respond(service.updateClientStatus(id!!, status))
         }
+    }
+}
+
+fun validateId(id: Int?){
+    if(id == null){
+        throw SunshineException(SunshineExceptionEnum.INVALID_ID)
     }
 }

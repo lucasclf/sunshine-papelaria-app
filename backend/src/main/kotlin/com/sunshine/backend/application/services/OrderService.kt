@@ -1,12 +1,12 @@
 package com.sunshine.backend.application.services
 
-import com.sunshine.backend.domain.enums.OrderStatus
+import com.sunshine.backend.domain.enums.OrderStatusEnum
 import com.sunshine.backend.domain.enums.SunshineExceptionEnum
 import com.sunshine.backend.domain.exceptions.SunshineException
-import com.sunshine.backend.domain.models.Order
-import com.sunshine.backend.domain.models.OrderItem
-import com.sunshine.backend.domain.models.OrderPaidUpdate
-import com.sunshine.backend.domain.models.OrderSentUpdate
+import com.sunshine.backend.domain.models.OrderModel
+import com.sunshine.backend.domain.models.OrderItemModel
+import com.sunshine.backend.domain.models.OrderPaidUpdateModel
+import com.sunshine.backend.domain.models.OrderSentUpdateModel
 import com.sunshine.backend.domain.repositories.OrderItemRepository
 import com.sunshine.backend.domain.repositories.OrderRepository
 import com.sunshine.backend.domain.repositories.ProductRepository
@@ -17,61 +17,61 @@ class OrderService(
     private val orderItemRepository: OrderItemRepository,
     private val productRepository: ProductRepository,
     ) {
-    fun getAllOrders(): List<Order> = orderRepository.getAll()
+    fun getAllOrders(): List<OrderModel> = orderRepository.getAll()
 
-    fun getOrder(orderId: Int): Order? = orderRepository.getById(orderId)
+    fun getOrder(orderId: Int): OrderModel? = orderRepository.getById(orderId)
 
-    fun createOrder(order: Order): Int {
-        val itemsValue = order.items.sumOf { item ->
+    fun createOrder(orderModel: OrderModel): Int {
+        val itemsValue = orderModel.items.sumOf { item ->
             val product = productRepository.getById(item.productId)
             product!!.price * item.quantity
         }
 
         return transaction {
-            val orderId: Int = orderRepository.insert(order, itemsValue)
+            val orderId: Int = orderRepository.insert(orderModel, itemsValue)
 
-            orderItemRepository.insert(orderId, order.items)
+            orderItemRepository.insert(orderId, orderModel.items)
 
             return@transaction orderId
         }
     }
 
-    fun updateOrderToPaid(orderId: Int, update: OrderPaidUpdate): Boolean {
+    fun updateOrderToPaid(orderId: Int, update: OrderPaidUpdateModel): Boolean {
         val order = getOrder(orderId)
-        if(order!!.status == OrderStatus.AWAITING_PAYMENT){
+        if(order!!.status == OrderStatusEnum.AWAITING_PAYMENT){
             return orderRepository.updateOrderToPaid(orderId, update)
         } else {
             throw SunshineException(
                 SunshineExceptionEnum.INVALID_ORDER_STATUS,
-                OrderStatus.AWAITING_PAYMENT.name
+                OrderStatusEnum.AWAITING_PAYMENT.name
             )
         }
     }
 
-    fun updateOrderToSent(orderId: Int, update: OrderSentUpdate): Boolean {
+    fun updateOrderToSent(orderId: Int, update: OrderSentUpdateModel): Boolean {
         val order = getOrder(orderId)
-        if(order!!.status == OrderStatus.PAID){
+        if(order!!.status == OrderStatusEnum.PAID){
             return orderRepository.updateOrderToSent(orderId, update)
         } else {
             throw SunshineException(
                 SunshineExceptionEnum.INVALID_ORDER_STATUS,
-                OrderStatus.PAID.name
+                OrderStatusEnum.PAID.name
             )
         }
     }
 
     fun deleteOrder(orderId: Int): Boolean {
         val order = getOrder(orderId)
-        if(order!!.status == OrderStatus.AWAITING_PAYMENT){
+        if(order!!.status == OrderStatusEnum.AWAITING_PAYMENT){
             return orderRepository.delete(orderId)
         } else {
             throw SunshineException(
                 SunshineExceptionEnum.INVALID_ORDER_STATUS,
-                OrderStatus.AWAITING_PAYMENT.name
+                OrderStatusEnum.AWAITING_PAYMENT.name
             )
         }
     }
 
-    fun getAllOrderItems(): List<OrderItem> = orderItemRepository.getAll()
-    fun getAllItems(orderId: Int): List<OrderItem> = orderItemRepository.getByOrderId(orderId)
+    fun getAllOrderItems(): List<OrderItemModel> = orderItemRepository.getAll()
+    fun getAllItems(orderId: Int): List<OrderItemModel> = orderItemRepository.getByOrderId(orderId)
 }

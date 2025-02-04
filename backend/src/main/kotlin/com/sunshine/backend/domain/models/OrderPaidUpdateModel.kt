@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 @Serializable
-data class OrderPaidUpdate(
+data class OrderPaidUpdateModel(
     val discount: Double,
     val freight: Double,
     @Serializable(with = LocalDateTimeSerializer::class)

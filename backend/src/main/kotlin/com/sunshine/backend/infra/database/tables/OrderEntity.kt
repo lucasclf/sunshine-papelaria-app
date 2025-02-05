@@ -12,9 +12,12 @@ object OrderEntity: Table("Orders") {
     val totalValue = double("total_value")
     val discount = double("discount")
     val freight = double("freight")
+    val refundedValue = double("refunded_value")
+    val refundedReason = varchar("refunded_reason", 200)
     val status = enumerationByName("status", 50, OrderStatusEnum::class)
     val trackingCode = varchar("tracking_code", 50)
     val carrierName = varchar("carrier_name", 50)
+    val refundedDate = datetime("refunded_date")
     val paymentDate = datetime("payment_date")
     val sentDate = datetime("sent_date")
     val createDate = datetime("create_date").clientDefault { LocalDateTime.now() }

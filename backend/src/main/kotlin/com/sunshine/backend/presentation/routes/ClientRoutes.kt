@@ -33,11 +33,9 @@ fun Route.clientRoutes(service: ClientService) {
         }
 
         put("/{id}") {
-
             val id = call.parameters["id"]?.toIntOrNull()
             logger.info("Iniciando atualização do cliente ${id}!")
             validateId(id)
-
 
             val request = call.receive<ClientRequest>()
             call.respond(service.updateClient(request, id!!))

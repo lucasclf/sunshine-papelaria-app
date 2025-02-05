@@ -1,16 +1,15 @@
 package com.sunshine.backend.presentation.routes
 
 import com.sunshine.backend.application.services.OrderService
-import kotlinx.serialization.json.Json
-import com.sunshine.backend.domain.models.OrderModel
-import com.sunshine.backend.domain.models.OrderPaidUpdateModel
-import com.sunshine.backend.domain.models.OrderSentUpdateModel
-import io.ktor.http.*
+import com.sunshine.backend.domain.enums.OrderStatusEnum
+import com.sunshine.backend.presentation.requests.OrderPaidUpdateRequest
+import com.sunshine.backend.presentation.requests.OrderRefundedUpdateRequest
+import com.sunshine.backend.presentation.requests.OrderRequest
+import com.sunshine.backend.presentation.requests.OrderSentUpdateRequest
+import com.sunshine.backend.presentation.utils.ValidationUtils.validateId
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import org.slf4j.LoggerFactory
 
 
@@ -24,54 +23,47 @@ fun Route.orderRoutes(service: OrderService) {
 
         get("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val order = service.getOrder(id)
-                if (order != null) call.respond(order) else call.respond("Pedido não encontrado")
-            } else {
-                call.respond("ID inválido")
-            }
+            validateId(id)
+
+            val order = service.getOrder(id!!)
+            call.respond(order)
         }
 
         post {
-            val orderModel = call.receive<OrderModel>()
-            val id = service.createOrder(orderModel)
-            call.respond("Pedido inserido com ID $id")
+            val orderRequest = call.receive<OrderRequest>()
+            val persistedOrder = service.createOrder(orderRequest)
+            call.respond(persistedOrder)
         }
 
         patch("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
+            validateId(id)
 
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID inválido")
-                return@patch
-            }
-
-            val jsonString = call.receive<String>()
-            val jsonUpdate = Json.decodeFromString<JsonObject>(jsonString)
-            logger.info("Received JSON: $jsonUpdate")
-
-
+            val status = call.request.headers["status"]
             when {
-                jsonUpdate.containsKey("paymentDate") -> {
-                    val orderPaidUpdateModel = Json.decodeFromJsonElement<OrderPaidUpdateModel>(jsonUpdate)
-                    val updated = service.updateOrderToPaid(id, orderPaidUpdateModel)
-                    call.respond(if (updated) "Pedido atualizado" else "Pedido não encontrado")
+                OrderStatusEnum.PAID.name == status -> {
+                    val updatedRequest = call.receive<OrderPaidUpdateRequest>()
+                    val updatedOrder = service.updateOrderToPaid(id!!, updatedRequest)
+                    call.respond(updatedOrder)
                 }
-                jsonUpdate.containsKey("sentDate") -> {
-                    val orderSentUpdateModel = Json.decodeFromJsonElement<OrderSentUpdateModel>(jsonUpdate)
-                    val updated = service.updateOrderToSent(id, orderSentUpdateModel)
-                    call.respond(if (updated) "Pedido atualizado" else "Pedido não encontrado")
+                OrderStatusEnum.SENT.name == status -> {
+                    val updatedRequest = call.receive<OrderSentUpdateRequest>()
+                    val updatedOrder = service.updateOrderToSent(id!!, updatedRequest)
+                    call.respond(updatedOrder)
                 }
-            }
-        }
-
-        delete("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val deleted = service.deleteOrder(id)
-                call.respond(if (deleted) "Pedido removido" else "Pedido não encontrado")
-            } else {
-                call.respond("ID inválido")
+                OrderStatusEnum.RECEIVED.name == status -> {
+                    val updatedOrder = service.updateOrderToReceived(id!!)
+                    call.respond(updatedOrder)
+                }
+                OrderStatusEnum.REFUNDED.name == status -> {
+                    val updatedRequest = call.receive<OrderRefundedUpdateRequest>()
+                    val updatedOrder = service.updateOrderToRefunded(id!!, updatedRequest)
+                    call.respond(updatedOrder)
+                }
+                OrderStatusEnum.CANCELED.name == status -> {
+                    val updatedOrder = service.updateOrderToCanceled(id!!)
+                    call.respond(updatedOrder)
+                }
             }
         }
     }

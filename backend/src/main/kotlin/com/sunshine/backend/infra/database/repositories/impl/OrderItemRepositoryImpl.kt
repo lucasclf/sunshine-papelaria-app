@@ -43,12 +43,19 @@ class OrderItemRepositoryImpl : OrderItemRepository {
         }
     }
 
-    override fun insert(orderId: Int, orderItemModels: List<OrderItemModel>) = transaction {
+    override fun insert(orderId: Int, orderItemModels: List<OrderItemModel>): List<OrderItemModel> = transaction {
         OrderItemEntity.batchInsert(orderItemModels) { item ->
             this[OrderItemEntity.orderId] = orderId
             this[OrderItemEntity.productId] = item.productId
             this[OrderItemEntity.quantity] = item.quantity
-        }.let {}
+        }.map {
+            OrderItemModel(
+                orderId = it[OrderItemEntity.orderId],
+                productId = it[OrderItemEntity.productId],
+                quantity = it[OrderItemEntity.quantity],
+                createDate = it[OrderItemEntity.createDate]
+            )
+        }
     }
 
     override fun update(orderItemModel: OrderItemModel): Boolean = transaction {

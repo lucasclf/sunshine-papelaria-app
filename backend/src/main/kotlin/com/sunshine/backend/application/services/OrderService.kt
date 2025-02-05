@@ -1,15 +1,19 @@
 package com.sunshine.backend.application.services
 
+import com.sunshine.backend.application.adapters.OrderAdapter
 import com.sunshine.backend.domain.enums.OrderStatusEnum
 import com.sunshine.backend.domain.enums.SunshineExceptionEnum
 import com.sunshine.backend.domain.exceptions.SunshineException
 import com.sunshine.backend.domain.models.OrderModel
 import com.sunshine.backend.domain.models.OrderItemModel
-import com.sunshine.backend.domain.models.OrderPaidUpdateModel
-import com.sunshine.backend.domain.models.OrderSentUpdateModel
 import com.sunshine.backend.domain.repositories.OrderItemRepository
 import com.sunshine.backend.domain.repositories.OrderRepository
 import com.sunshine.backend.domain.repositories.ProductRepository
+import com.sunshine.backend.presentation.requests.OrderPaidUpdateRequest
+import com.sunshine.backend.presentation.requests.OrderRefundedUpdateRequest
+import com.sunshine.backend.presentation.requests.OrderRequest
+import com.sunshine.backend.presentation.requests.OrderSentUpdateRequest
+import com.sunshine.backend.presentation.responses.OrderResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class OrderService(
@@ -17,29 +21,46 @@ class OrderService(
     private val orderItemRepository: OrderItemRepository,
     private val productRepository: ProductRepository,
     ) {
-    fun getAllOrders(): List<OrderModel> = orderRepository.getAll()
-
-    fun getOrder(orderId: Int): OrderModel? = orderRepository.getById(orderId)
-
-    fun createOrder(orderModel: OrderModel): Int {
-        val itemsValue = orderModel.items.sumOf { item ->
-            val product = productRepository.getById(item.productId)
-            product!!.price * item.quantity
-        }
-
-        return transaction {
-            val orderId: Int = orderRepository.insert(orderModel, itemsValue)
-
-            orderItemRepository.insert(orderId, orderModel.items)
-
-            return@transaction orderId
+    fun getAllOrders(): List<OrderResponse> {
+        return orderRepository.getAll().map{orderModel ->
+            OrderAdapter.modelToOrderResponse(orderModel)
         }
     }
 
-    fun updateOrderToPaid(orderId: Int, update: OrderPaidUpdateModel): Boolean {
-        val order = getOrder(orderId)
-        if(order!!.status == OrderStatusEnum.AWAITING_PAYMENT){
-            return orderRepository.updateOrderToPaid(orderId, update)
+    fun getOrder(orderId: Int): OrderResponse{
+        return OrderAdapter.modelToOrderResponse(orderRepository.getById(orderId))
+    }
+
+    fun createOrder(orderRequest: OrderRequest): OrderResponse {
+        val orderModel = OrderAdapter.orderRequestToModel(orderRequest)
+
+        val itemsValue = orderModel.items.sumOf { item ->
+            val product = productRepository.getById(item.productId)
+            product.price * item.quantity
+        }
+
+        return transaction {
+            val persistedModel: OrderModel = orderRepository.insert(orderModel, itemsValue)
+
+            val persistedItems: List<OrderItemModel> = orderItemRepository.insert(
+                persistedModel.id!!,
+                orderModel.items
+            )
+
+            return@transaction OrderAdapter.modelToOrderResponse(
+                persistedModel.copy(items = persistedItems)
+            )
+        }
+    }
+
+    fun updateOrderToPaid(orderId: Int, update: OrderPaidUpdateRequest): OrderResponse {
+        val orderModel = OrderAdapter.updatePaidRequestToModel(orderRepository.getById(orderId), update)
+
+        if(orderModel.status == OrderStatusEnum.AWAITING_PAYMENT){
+            val updatedOrder = orderRepository.updateOrderStatus(orderModel.copy(
+                status = OrderStatusEnum.PAID
+            ))
+            return OrderAdapter.modelToOrderResponse(updatedOrder)
         } else {
             throw SunshineException(
                 SunshineExceptionEnum.INVALID_ORDER_STATUS,
@@ -48,10 +69,14 @@ class OrderService(
         }
     }
 
-    fun updateOrderToSent(orderId: Int, update: OrderSentUpdateModel): Boolean {
-        val order = getOrder(orderId)
-        if(order!!.status == OrderStatusEnum.PAID){
-            return orderRepository.updateOrderToSent(orderId, update)
+    fun updateOrderToSent(orderId: Int, update: OrderSentUpdateRequest): OrderResponse {
+        val orderModel = OrderAdapter.updateSentRequestToModel(orderRepository.getById(orderId), update)
+
+        if(orderModel.status == OrderStatusEnum.PAID){
+            val updatedOrder = orderRepository.updateOrderStatus(orderModel.copy(
+                status = OrderStatusEnum.SENT
+            ))
+            return OrderAdapter.modelToOrderResponse(updatedOrder)
         } else {
             throw SunshineException(
                 SunshineExceptionEnum.INVALID_ORDER_STATUS,
@@ -60,10 +85,30 @@ class OrderService(
         }
     }
 
-    fun deleteOrder(orderId: Int): Boolean {
-        val order = getOrder(orderId)
-        if(order!!.status == OrderStatusEnum.AWAITING_PAYMENT){
-            return orderRepository.delete(orderId)
+    fun updateOrderToReceived(orderId: Int): OrderResponse {
+        val orderModel = orderRepository.getById(orderId)
+
+        if(orderModel.status == OrderStatusEnum.SENT){
+            val updatedOrder = orderRepository.updateOrderStatus(orderModel.copy(
+                status = OrderStatusEnum.RECEIVED
+            ))
+            return OrderAdapter.modelToOrderResponse(updatedOrder)
+        } else {
+            throw SunshineException(
+                SunshineExceptionEnum.INVALID_ORDER_STATUS,
+                OrderStatusEnum.SENT.name
+            )
+        }
+    }
+
+    fun updateOrderToCanceled(orderId: Int): OrderResponse {
+        val orderModel = orderRepository.getById(orderId)
+
+        if(orderModel.status == OrderStatusEnum.AWAITING_PAYMENT){
+            val updatedOrder = orderRepository.updateOrderStatus(orderModel.copy(
+                status = OrderStatusEnum.CANCELED
+            ))
+            return OrderAdapter.modelToOrderResponse(updatedOrder)
         } else {
             throw SunshineException(
                 SunshineExceptionEnum.INVALID_ORDER_STATUS,
@@ -72,6 +117,19 @@ class OrderService(
         }
     }
 
-    fun getAllOrderItems(): List<OrderItemModel> = orderItemRepository.getAll()
-    fun getAllItems(orderId: Int): List<OrderItemModel> = orderItemRepository.getByOrderId(orderId)
+    fun updateOrderToRefunded(orderId: Int, update: OrderRefundedUpdateRequest): OrderResponse {
+        val orderModel = OrderAdapter.updateRefundedRequestToModel(orderRepository.getById(orderId), update)
+
+        if(orderModel.status == OrderStatusEnum.SENT || orderModel.status == OrderStatusEnum.PAID){
+            val updatedOrder = orderRepository.updateOrderStatus(orderModel.copy(
+                status = OrderStatusEnum.REFUNDED
+            ))
+            return OrderAdapter.modelToOrderResponse(updatedOrder)
+        } else {
+            throw SunshineException(
+                SunshineExceptionEnum.INVALID_ORDER_STATUS,
+                "${OrderStatusEnum.PAID.name} ou ${OrderStatusEnum.SENT.name}"
+            )
+        }
+    }
 }

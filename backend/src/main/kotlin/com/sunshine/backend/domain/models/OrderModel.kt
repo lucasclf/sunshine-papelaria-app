@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 @Serializable
 data class OrderModel (
-    val id: Int,
+    val id: Int? = null,
     val clientId: Int,
     val totalValue: Double = 0.0,
     val status: OrderStatusEnum = OrderStatusEnum.AWAITING_PAYMENT,
@@ -15,11 +15,15 @@ data class OrderModel (
     val freight: Double = 0.0,
     val discount: Double = 0.0,
     val trackingCode: String? = null,
-    val carrierName: String? =null,
+    val carrierName: String? = null,
+    val refundedValue: Double = 0.0,
+    val refundedReason: String? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
     val paymentDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
     val sentDate: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val refundedDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)
     val createDate: LocalDateTime? = null,
     @Serializable(with = LocalDateTimeSerializer::class)

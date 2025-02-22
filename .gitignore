@@ -5,11 +5,11 @@ Thumbs.db
 *.tmp
 
 # Diretórios do Gradle e Kotlin
-/backend/.gradle/
-/backend/build/
-/backend/out/
-/backend/.idea/
-/backend/*.iml
+/stock-manager-backend/.gradle/
+/stock-manager-backend/build/
+/stock-manager-backend/out/
+/stock-manager-backend/.idea/
+/stock-manager-backend/*.iml
 
 # Dependências do Node.js
 /frontend/node_modules/
@@ -23,10 +23,12 @@ Thumbs.db
 /frontend/build/
 /frontend/release/
 /frontend/*.asar
+/frontend/electron-out/
+/frontend/electron-builder-cache/
 
 # Ambientes e configurações sensíveis
 .env
-/backend/local.properties
+/stock-manager-backend/local.properties
 /frontend/.env.local
 /frontend/.env.development
 /frontend/.env.production
@@ -56,4 +58,20 @@ lerna-debug.log*
 *.tmp
 
 # Arquivos do banco de dados
-database.db
+*.db
+*.sqlite3
+*.db-wal
+*.db-shm
+
+# Spring Boot
+/stock-manager-backend/.mvn/
+/stock-manager-backend/mvnw
+/stock-manager-backend/mvnw.cmd
+/stock-manager-backend/.idea/modules.xml
+/stock-manager-backend/.idea/workspace.xml
+
+# Jetbrains
+/stock-manager-backend/.idea/shelf/
+/stock-manager-backend/.idea/httpRequests/
+/stock-manager-backend/.docker/
+docker-compose.override.yml

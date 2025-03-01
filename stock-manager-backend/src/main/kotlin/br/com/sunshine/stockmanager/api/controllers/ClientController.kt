@@ -9,7 +9,13 @@ import br.com.sunshine.stockmanager.domain.usecase.CreateClientUseCase
 import br.com.sunshine.stockmanager.domain.usecase.FindClientsUseCase
 import br.com.sunshine.stockmanager.domain.usecase.UpdateClientUseCase
 import jakarta.validation.Valid
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
 
 @RestController
 @RequestMapping("clients")

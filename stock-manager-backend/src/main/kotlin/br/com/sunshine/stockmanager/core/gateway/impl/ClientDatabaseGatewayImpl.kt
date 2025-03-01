@@ -14,9 +14,9 @@ class ClientDatabaseGatewayImpl(private val clientRepository: ClientRepository):
     override fun saveClient(client: ClientModel): ClientModel {
         val clientEntity = CoreClientAdapter.modelToEntity(client)
 
-        val cretedEntity = clientRepository.saveAndFlush(clientEntity)
+        val createdEntity = clientRepository.saveAndFlush(clientEntity)
 
-        return CoreClientAdapter.entityToModel(cretedEntity)
+        return CoreClientAdapter.entityToModel(createdEntity)
     }
 
     override fun findAllClients(): List<ClientModel> {

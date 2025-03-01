@@ -16,4 +16,15 @@ class ProductDatabaseGatewayImpl(
 
         return CoreProductAdapter.entityToModel(savedEntity)
     }
+
+    override fun findAllProducts(): List<ProductModel> {
+        val entityList = repository.findAll()
+        return entityList.map { CoreProductAdapter.entityToModel(it) }
+    }
+
+    override fun findById(id: Int): ProductModel? {
+        val entity = repository.findById(id)
+
+        return entity.map { CoreProductAdapter.entityToModel(it) }.orElse(null)
+    }
 }
